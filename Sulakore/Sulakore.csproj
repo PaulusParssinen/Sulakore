@@ -10,6 +10,35 @@
 		<TrimmerSingleWarn>false</TrimmerSingleWarn>
 	</PropertyGroup>
 
+	<PropertyGroup Label="Packaging">
+		<IncludeSymbols>true</IncludeSymbols>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+	</PropertyGroup>
+	
+	<PropertyGroup Label="NuGet Metadata">
+		<Version>0.1.0</Version>
+		<Title>Sulakore</Title>
+		<PackageId>PaulusParssinen.$(AssemblyName)</PackageId>
+		<Authors>ArachisH,Paulus Pärssinen</Authors>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<RepositoryUrl>https://github.com/PaulusParssinen/Sulakore</RepositoryUrl>
+		<Description>Habbo Hotel SDK.</Description>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+	</PropertyGroup>
+	
 	<ItemGroup>
 		<ProjectReference Include="..\Sulakore.Generators\Sulakore.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
@@ -22,6 +51,7 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
 		<PackageReference Include="CommunityToolkit.HighPerformance" Version="8.2.2" />
 	</ItemGroup>
 
