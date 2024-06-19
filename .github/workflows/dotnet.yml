@@ -45,5 +45,5 @@ jobs:
     - name: Pack (w/ Symbols)
       run: dotnet pack -c Release --no-restore --no-build -v normal -p:Version='${{ steps.gitversion.outputs.SemVer }}'
     - name: NuGet push
-      run: dotnet nuget push Sulakore/Sulakore/bin/Release/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s $NUGET_FEED
+      run: dotnet nuget push Sulakore/Sulakore/bin/Release/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s ${{ env.$NUGET_FEED }}
       
