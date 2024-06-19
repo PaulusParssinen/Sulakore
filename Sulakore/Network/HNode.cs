@@ -8,12 +8,12 @@ using System.Security.Cryptography;
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography.X509Certificates;
 
-using Tanji.Core.Net.Formats;
-using Tanji.Core.Cryptography.Ciphers;
+using Sulakore.Network.Formats;
+using Sulakore.Cryptography.Ciphers;
 
 using CommunityToolkit.HighPerformance.Buffers;
 
-namespace Tanji.Core.Net;
+namespace Sulakore.Network;
 
 public sealed class HNode : IDisposable
 {

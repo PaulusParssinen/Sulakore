@@ -1,8 +1,8 @@
 ﻿using System.Buffers;
 
-using Tanji.Core.Net.Formats;
+using Sulakore.Network.Formats;
 
-namespace Tanji.Core.Net.Buffers;
+namespace Sulakore.Network.Buffers;
 
 /// <summary>
 /// Represents a rented heap-based, byte array output sink into which unmanaged values, and UTF8 encoded strings can be written to.
