@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace Sulakore.Network.Formats;
+namespace Tanji.Core.Net.Formats;
 
 // TODO: once we get abstract static interfaces out of preview (.NET 7) add IHParseable & Parse<TParseable>() and array variant
 
@@ -202,7 +202,7 @@ public static class IHFormatExtensions
         where TFormat : IHFormat
         where TFormattable : IHFormattable
     {
-        return TryWriteArray(format, destination, new ReadOnlySpan<TFormattable>(values), out bytesWritten);
+        return format.TryWriteArray(destination, new ReadOnlySpan<TFormattable>(values), out bytesWritten);
     }
     /// <inheritdoc cref="TryWriteArray{TFormat, TFormattable}(TFormat, Span{byte}, TFormattable[], out int)"/>
     public static bool TryWriteArray<TFormat, TFormattable>(this TFormat format, Span<byte> destination, ReadOnlySpan<TFormattable> values, out int bytesWritten)
@@ -263,7 +263,7 @@ public static class IHFormatExtensions
 
     public static bool TryWrite(this Span<byte> destination, IHFormat format,
         [InterpolatedStringHandlerArgument("format", "destination")] ref IHFormatTryWriteInterpolatedStringHandler handler, out int bytesWritten)
-        => TryWrite(format, destination, ref handler, out bytesWritten);
+        => format.TryWrite(destination, ref handler, out bytesWritten);
     public static bool TryWrite(this IHFormat format, Span<byte> destination,
         [InterpolatedStringHandlerArgument("format", "destination")] ref IHFormatTryWriteInterpolatedStringHandler handler, out int bytesWritten)
     {

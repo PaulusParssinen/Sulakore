@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace Sulakore.Network.Formats;
+namespace Tanji.Core.Net.Formats;
 
 /// <summary>
 /// Defines a mechanism for parsing a binary representation of a value.

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Sulakore.Network.Formats;
+namespace Tanji.Core.Net.Formats;
 
 /// <summary>
 /// Provides a handler used by the language compiler to format interpolated string into binary representation using specified <see cref="IHFormat"/>.

@@ -1,8 +1,8 @@
 ﻿using System.Net;
 
-using Sulakore.Habbo;
+using Tanji.Core.Canvas;
 
-namespace Sulakore.Network;
+namespace Tanji.Core.Net;
 
 public sealed class HotelEndPoint : IPEndPoint
 {

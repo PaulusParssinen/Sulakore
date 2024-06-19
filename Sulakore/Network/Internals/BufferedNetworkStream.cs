@@ -1,6 +1,6 @@
 ﻿using System.Net.Sockets;
 
-namespace Sulakore.Network;
+namespace Tanji.Core.Net;
 
 internal sealed class BufferedNetworkStream : Stream
 {

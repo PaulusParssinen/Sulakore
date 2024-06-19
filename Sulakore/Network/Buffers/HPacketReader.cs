@@ -1,6 +1,6 @@
-﻿using Sulakore.Network.Formats;
+﻿using Tanji.Core.Net.Formats;
 
-namespace Sulakore.Network.Buffers;
+namespace Tanji.Core.Net.Buffers;
 
 public ref struct HPacketReader
 {

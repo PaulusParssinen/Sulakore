@@ -1,8 +1,8 @@
 ﻿using System.Buffers;
 
-using Sulakore.Network.Formats;
+using Tanji.Core.Net.Formats;
 
-namespace Sulakore.Network.Buffers;
+namespace Tanji.Core.Net.Buffers;
 
 /// <summary>
 /// Represents a rented heap-based, byte array output sink into which unmanaged values, and UTF8 encoded strings can be written to.
@@ -32,7 +32,7 @@ public sealed class HPacketWriter : IBufferWriter<byte>, IDisposable
 
         Id = id;
         Format = format;
-        WrittenCount -= format.MinBufferSize;
+        WrittenCount += format.MinBufferSize;
 
         Span<byte> headerSpan = GetSpan(format.MinBufferSize);
         if (!format.TryWriteHeader(headerSpan, format.MinPacketLength, id, out int bytesWritten))

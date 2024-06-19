@@ -2,10 +2,10 @@
 using System.Buffers;
 using System.Text.Unicode;
 using System.Buffers.Binary;
-using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
-namespace Sulakore.Network.Formats;
+namespace Tanji.Core.Net.Formats;
 
 public sealed class EvaWireFormat : IHFormat
 {

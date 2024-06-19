@@ -1,11 +1,19 @@
-﻿namespace Sulakore.Network;
+﻿using System.Net;
+
+namespace Tanji.Core.Net;
 
 public interface IHConnection
 {
-    Habbo.Incoming? In { get; }
-    Habbo.Outgoing? Out { get; }
-    HotelEndPoint RemoteEndPoint { get; }
+    HNode? Local { get; }
+    HNode? Remote { get; }
 
-    ValueTask SendToClientAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default);
-    ValueTask SendToServerAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default);
+    bool IsConnected { get; }
+    int TotalInboundPackets { get; }
+    int TotalOutboundPackets { get; }
+
+    HConnectionContext Context { get; }
+
+    Task AttachNodesAsync(CancellationToken cancellationToken = default);
+    Task InterceptLocalConnectionAsync(CancellationToken cancellationToken = default);
+    Task EstablishRemoteConnectionAsync(IPEndPoint remoteEndPoint, CancellationToken cancellationToken = default);
 }

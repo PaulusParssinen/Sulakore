@@ -1,4 +1,4 @@
-﻿namespace Sulakore.Network.Formats;
+﻿namespace Tanji.Core.Net.Formats;
 
 /// <summary>
 /// Provides functionality to format the binary representation of an object into a <see cref="Span{byte}"/>.
