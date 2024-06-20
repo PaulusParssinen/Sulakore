@@ -1,6 +1,0 @@
-﻿<Project>
-	<ItemGroup>
-		<CompilerVisibleProperty Include="IsOutgoing" />
-		<CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="IsOutgoing" />
-	</ItemGroup>
-</Project>
