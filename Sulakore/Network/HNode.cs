@@ -17,11 +17,11 @@ namespace Sulakore.Network;
 
 public sealed class HNode : IDisposable
 {
-    private static ReadOnlySpan<byte> _okBytes => "OK"u8;
-    private static ReadOnlySpan<byte> _startTLSBytes => "StartTLS"u8;
-    private static ReadOnlySpan<byte> _rfc6455GuidBytes => "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"u8;
-    private static ReadOnlySpan<byte> _secWebSocketKeyBytes => "Sec-WebSocket-Key: "u8;
-    private static ReadOnlySpan<byte> _upgradeWebSocketResponseBytes => "HTTP/1.1 101 Switching Protocols\r\nConnection: Upgrade\r\nUpgrade: websocket\r\nSec-WebSocket-Accept: "u8;
+    private static ReadOnlySpan<byte> OkBytes => "OK"u8;
+    private static ReadOnlySpan<byte> StartTlsBytes => "StartTLS"u8;
+    private static ReadOnlySpan<byte> Rfc6455GuidBytes => "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"u8;
+    private static ReadOnlySpan<byte> SecWebSocketKeyBytes => "Sec-WebSocket-Key: "u8;
+    private static ReadOnlySpan<byte> UpgradeWebSocketResponseBytes => "HTTP/1.1 101 Switching Protocols\r\nConnection: Upgrade\r\nUpgrade: websocket\r\nSec-WebSocket-Accept: "u8;
 
     private readonly Socket _socket;
     private readonly SemaphoreSlim _sendSemaphore, _receiveSemaphore;
@@ -200,7 +200,7 @@ public sealed class HNode : IDisposable
             Base64.EncodeToUtf8InPlace(keyGenerationBuffer, 16, out int encodedSize);
             return Encoding.UTF8.GetString(keyGenerationBuffer.Slice(0, encodedSize));
         }
-        static bool IsTLSAccepted(ReadOnlySpan<byte> message) => message.SequenceEqual(_okBytes);
+        static bool IsTLSAccepted(ReadOnlySpan<byte> message) => message.SequenceEqual(OkBytes);
         const string requestHeaders = "Connection: Upgrade\r\n"
                                       + "Pragma: no-cache\r\n"
                                       + "Cache-Control: no-cache\r\n"
@@ -238,7 +238,7 @@ public sealed class HNode : IDisposable
         IsUpgraded = true;
         _socketStream = _webSocketStream = new WebSocketStream(_socketStream, true, false); // Anything now being sent or received through the stream will be parsed using the WebSocket protocol.
 
-        await SendAsync(_startTLSBytes.ToArray(), cancellationToken).ConfigureAwait(false);
+        await SendAsync(StartTlsBytes.ToArray(), cancellationToken).ConfigureAwait(false);
         received = await ReceiveAsync(receiveOwner.Memory, cancellationToken).ConfigureAwait(false);
         if (!IsTLSAccepted(receiveOwner.Span.Slice(0, received))) return false;
 
@@ -252,20 +252,20 @@ public sealed class HNode : IDisposable
     }
     public async Task<bool> UpgradeToWebSocketServerAsync(X509Certificate certificate, CancellationToken cancellationToken = default)
     {
-        static bool IsTLSRequested(ReadOnlySpan<byte> message) => message.SequenceEqual(_startTLSBytes);
+        static bool IsTLSRequested(ReadOnlySpan<byte> message) => message.SequenceEqual(StartTlsBytes);
         static void FillWebResponse(ReadOnlySpan<byte> webRequest, Span<byte> webResponse, out int responseWritten)
         {
-            int keyStart = webRequest.LastIndexOf(_secWebSocketKeyBytes) + _secWebSocketKeyBytes.Length;
+            int keyStart = webRequest.LastIndexOf(SecWebSocketKeyBytes) + SecWebSocketKeyBytes.Length;
             int keySize = webRequest.Slice(keyStart).IndexOf((byte)13); // Carriage Return
 
-            Span<byte> mergedKey = stackalloc byte[keySize + _rfc6455GuidBytes.Length];
+            Span<byte> mergedKey = stackalloc byte[keySize + Rfc6455GuidBytes.Length];
             webRequest.Slice(keyStart, keySize).CopyTo(mergedKey);
-            _rfc6455GuidBytes.CopyTo(mergedKey.Slice(keySize));
+            Rfc6455GuidBytes.CopyTo(mergedKey.Slice(keySize));
 
-            _upgradeWebSocketResponseBytes.CopyTo(webResponse);
-            responseWritten = _upgradeWebSocketResponseBytes.Length;
+            UpgradeWebSocketResponseBytes.CopyTo(webResponse);
+            responseWritten = UpgradeWebSocketResponseBytes.Length;
 
-            int keyHashedSize = SHA1.HashData(mergedKey, webResponse.Slice(_upgradeWebSocketResponseBytes.Length));
+            int keyHashedSize = SHA1.HashData(mergedKey, webResponse.Slice(UpgradeWebSocketResponseBytes.Length));
             Base64.EncodeToUtf8InPlace(webResponse.Slice(responseWritten), keyHashedSize, out int keyEncodedSize);
             responseWritten += keyEncodedSize;
 
@@ -292,7 +292,7 @@ public sealed class HNode : IDisposable
         received = await ReceiveAsync(receivedOwner.Memory, cancellationToken).ConfigureAwait(false);
         if (IsTLSRequested(receivedOwner.Span.Slice(0, received)))
         {
-            await SendAsync(_okBytes.ToArray(), cancellationToken).ConfigureAwait(false);
+            await SendAsync(OkBytes.ToArray(), cancellationToken).ConfigureAwait(false);
 
             var secureSocketStream = new SslStream(_socketStream, false, AlwaysValidateRemoteCertificate);
             _socketStream = secureSocketStream;
