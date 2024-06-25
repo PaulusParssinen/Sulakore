@@ -12,7 +12,7 @@ public interface IHParsable<TSelf> where TSelf : IHParsable<TSelf>?
     /// <param name="source">The span of bytes to parse.</param>
     /// <param name="format">The protocol format which is used to parse the value from <paramref name="source" />.</param>
     /// <returns>The result of parsing <paramref name="s" />.</returns>
-    static abstract TSelf Parse(ReadOnlySpan<byte> source, IHFormat format);
+    static abstract TSelf Parse<TFormat>(ReadOnlySpan<byte> source, TFormat format);
 
     /// <summary>Tries to parse a span of bytes into a value.</summary>
     /// <param name="result">On return, contains the result of successfully parsing <paramref name="source" /> or an undefined value on failure.</param>

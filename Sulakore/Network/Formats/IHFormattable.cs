@@ -15,5 +15,5 @@ public interface IHFormattable
     /// A span containing the characters that represent a custom format string that defines the acceptable format for destination.
     /// </param>
     /// <returns>true if the formatting was successful; otherwise, false.</returns>
-    bool TryFormat(Span<byte> destination, IHFormat format, out int bytesWritten, ReadOnlySpan<char> formatString);
+    bool TryFormat<TFormat>(Span<byte> destination, TFormat format, out int bytesWritten, ReadOnlySpan<char> formatString) where TFormat : struct, IHFormat;
 }

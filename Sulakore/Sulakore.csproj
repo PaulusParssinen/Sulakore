@@ -1,11 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
-		<Nullable>enable</Nullable>
-		<LangVersion>latest</LangVersion>
-		<ImplicitUsings>enable</ImplicitUsings>
-
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<IsTrimmable>true</IsTrimmable>
 		<TrimmerSingleWarn>false</TrimmerSingleWarn>
 	</PropertyGroup>
@@ -19,6 +15,13 @@
 
 		<AdditionalFiles Include=".\incoming.json" IsOutgoing="false" />
 		<AdditionalFiles Include=".\outgoing.json" IsOutgoing="true" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Connections.Abstractions" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+		<PackageReference Include="System.IO.Pipelines" Version="8.0.0" />
 	</ItemGroup>
 
 </Project>

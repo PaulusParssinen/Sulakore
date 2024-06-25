@@ -11,7 +11,8 @@ namespace Sulakore.Habbo;
 /// <summary>
 /// Represents a three-tuple of x-, y-, and z-coordinates that define a point in a three-dimensional space.
 /// </summary>
-public struct HPoint : IEquatable<HPoint>,
+public readonly struct HPoint : IEquatable<HPoint>,
+    IHFormattable, IHParsable<HPoint>,
     ISpanFormattable, ISpanParsable<HPoint>,
     IAdditiveIdentity<HPoint, HPoint>,
     IAdditionOperators<HPoint, HPoint, HPoint>,
@@ -25,9 +26,9 @@ public struct HPoint : IEquatable<HPoint>,
 
     static HPoint IAdditiveIdentity<HPoint, HPoint>.AdditiveIdentity => Origin;
 
-    public int X { readonly get; set; }
-    public int Y { readonly get; set; }
-    public float Z { readonly get; set; }
+    public int X { get; }
+    public int Y { get; }
+    public float Z { get; }
 
     public HPoint()
         : this(0, 0, 0f)
@@ -68,7 +69,7 @@ public struct HPoint : IEquatable<HPoint>,
     public readonly bool Equals((int X, int Y, float Z) point, float epsilon = DEFAULT_EPSILON)
         => X == point.X && Y == point.Y && Math.Abs(point.Z - Z) < epsilon;
 
-    public readonly bool TryFormat(Span<byte> destination, IHFormat format, out int bytesWritten, ReadOnlySpan<char> formatString)
+    public readonly bool TryFormat<TFormat>(Span<byte> destination, TFormat format, out int bytesWritten, ReadOnlySpan<char> formatString) where TFormat : struct, IHFormat
         => destination.TryWrite(format, $"{X}{Y}", out bytesWritten);
 
     public static bool operator !=(HPoint left, HPoint right) => !(left == right);
@@ -115,7 +116,7 @@ public struct HPoint : IEquatable<HPoint>,
         return result;
     }
     /// <inheritdoc cref="Parse(ReadOnlySpan{char}, IFormatProvider?)"/>
-    public static HPoint Parse(string s, IFormatProvider? provider = null) => Parse(s.AsSpan());
+    public static HPoint Parse(string s, IFormatProvider? provider = null) => Parse(s.AsSpan(), provider: null);
 
     /// <inheritdoc cref="Parse(ReadOnlySpan{char}, IFormatProvider?)"/>
     public static bool TryParse(ReadOnlySpan<char> s, out HPoint result)
@@ -138,9 +139,8 @@ public struct HPoint : IEquatable<HPoint>,
         // try to parse the Z-coordinate as a floating-point number.
 
         int y;
-        float z;
 
-        separatorIndex = s.IndexOf(',');        
+        separatorIndex = s.IndexOf(',');
         if (separatorIndex == -1)
         {
             if (int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out y))
@@ -150,7 +150,7 @@ public struct HPoint : IEquatable<HPoint>,
             }
         }
         else if (int.TryParse(s.Slice(0, separatorIndex), NumberStyles.Integer, CultureInfo.InvariantCulture, out y) &&
-            float.TryParse(s.Slice(separatorIndex + 1), NumberStyles.Float, CultureInfo.InvariantCulture, out z))
+            float.TryParse(s.Slice(separatorIndex + 1), NumberStyles.Float, CultureInfo.InvariantCulture, out float z))
         {
             result = new HPoint(x, y, z);
             return true;
