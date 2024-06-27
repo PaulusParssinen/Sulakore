@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 namespace Sulakore.Cryptography;
 
 /// <summary>
-/// Provides functionality for two parties establish a shared secret using RSA and Diffie-hellman key exchange.
+/// Provides functionality for two parties establish a shared secret using RSA and Diffie-Hellman key exchange.
 /// </summary>
 /// <remarks>
 /// NOTE: This class is not considered cryptographically secure; it is a managed implementation, does not do constant-time operations,
@@ -74,13 +74,13 @@ public sealed class HKeyExchange
     }
 
     // TODO: Consider trying to just use the OS RSA impl over interop. Will require keys to be kept as byte arrays.
-    public BigInteger Sign(BigInteger message) => PKCSPad(CalculatePrivate(message), PKCSPadding.MaxByte);
-    public BigInteger Verify(BigInteger message) => CalculatePublic(PKCSUnpad(message));
+    public BigInteger Sign(BigInteger message) => CalculatePrivate(PKCSPad(message, PKCSPadding.MaxByte));
+    public BigInteger Verify(BigInteger message) => PKCSUnpad(CalculatePublic(message));
 
     public BigInteger Encrypt(BigInteger message) => CalculatePublic(PKCSPad(message, PKCSPadding.RandomByte));
     public BigInteger Decrypt(BigInteger message) => PKCSUnpad(CalculatePrivate(message));
 
-    private static BigInteger CreateRandomProbablePrime(int bitSize)
+    public static BigInteger CreateRandomProbablePrime(int bitSize)
     {
         Span<byte> integerData = stackalloc byte[(bitSize + 7) / 8];
         BigInteger probablePrime;
@@ -224,7 +224,7 @@ public sealed class HKeyExchange
             throw new ArgumentOutOfRangeException(nameof(message));
         }
 
-        int dataOffset = data.Slice(2, bytesWritten).IndexOf((byte)0) + 1;
+        int dataOffset = data.Slice(2, bytesWritten - 2).IndexOf((byte)0) + 1;
         return new BigInteger(data.Slice(dataOffset), isUnsigned: true);
     }
 
