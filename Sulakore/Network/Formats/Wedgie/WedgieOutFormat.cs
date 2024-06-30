@@ -1,4 +1,7 @@
-﻿namespace Sulakore.Network.Formats;
+﻿using System.Numerics;
+using System.Runtime.CompilerServices;
+
+namespace Sulakore.Network.Formats;
 
 public sealed class WedgieOutFormat : IHFormat
 {
@@ -22,7 +25,15 @@ public sealed class WedgieOutFormat : IHFormat
     public bool TryWriteLength(Span<byte> source, int length, out int bytesWritten) => throw new NotImplementedException();
     public bool TryWriteUTF8(Span<byte> destination, ReadOnlySpan<char> value, out int bytesWritten) => throw new NotImplementedException();
 
-    public static bool TryReadVL64Int32(ReadOnlySpan<byte> source, out int value, out int bytesRead)
+    public static int GetEncodedVL64Int32Length(int value) => GetEncodedVL64UInt32Length((uint)Math.Abs(value));
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int GetEncodedVL64UInt32Length(uint value)
+    {
+        return ((32 - BitOperations.LeadingZeroCount(value) + 9) * 43) >> 8;
+    }
+
+public static bool TryReadVL64Int32(ReadOnlySpan<byte> source, out int value, out int bytesRead)
     {
         value = bytesRead = 0;
         if (source.Length == 0) return false;
