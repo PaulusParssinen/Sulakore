@@ -1,10 +1,13 @@
-﻿namespace Sulakore.Network.Formats;
+﻿using Sulakore.Network.Formats.EvaWire;
+using Sulakore.Network.Formats.Wedgie;
+
+namespace Sulakore.Network.Formats;
 
 /// <summary>
 /// Provides a high-performance low-level APIs for reading and writing byte buffers.
 /// </summary>
 /// <remarks>
-/// Due to heavy optimizations, do not trust <c>out</c> parameters in <c>Try</c>-prefixed methods when the operation is unsuccessful (when the method returns <c>false</c>). 
+/// Due to optimizations, do not trust <c>out</c> parameters in <c>Try</c>-prefixed methods when the operation is unsuccessful (when the method returns <c>false</c>). 
 /// The <c>out</c> parameters contain un-initialized values when the operation is unsuccessful - this is standard behavior and can be also seen in runtime libraries.
 /// </remarks>
 public interface IHFormat
@@ -12,8 +15,8 @@ public interface IHFormat
     public static EvaWireFormat EvaWire { get; } = new EvaWireFormat(isUnity: false);
     public static EvaWireFormat EvaWireUnity { get; } = new EvaWireFormat(isUnity: true);
 
-    public static WedgieFormat WedgieIn { get; } = new WedgieFormat(isOutgoing: false);
-    public static WedgieFormat WedgieOut { get; } = new WedgieFormat(isOutgoing: true);
+    public static WedgieInFormat WedgieIn { get; } = new WedgieInFormat();
+    public static WedgieOutFormat WedgieOut { get; } = new WedgieOutFormat();
 
     /// <summary>
     /// Minimum buffer size required from a packet in bytes.
@@ -31,7 +34,7 @@ public interface IHFormat
     /// <summary>
     /// Returns the amount of bytes it takes to write <paramref name="value"/> of type <typeparamref name="T"/>.
     /// </summary>
-    public int GetSize<T>(T value) where T : struct;
+    public int GetSize<T>(T value) where T : unmanaged;
     /// <summary>
     /// Returns the amount of bytes it takes to write <paramref name="value"/> string.
     /// </summary>
@@ -53,7 +56,7 @@ public interface IHFormat
     /// <param name="value">The value upon returning <c>true</c>.</param>
     /// <param name="bytesRead">The amount of bytes read from <paramref name="source"/>.</param>
     /// <returns>true if the value was read successfully; otherwise, false.</returns>
-    public bool TryRead<T>(ReadOnlySpan<byte> source, out T value, out int bytesRead) where T : struct;
+    public bool TryRead<T>(ReadOnlySpan<byte> source, out T value, out int bytesRead) where T : unmanaged;
     /// <summary>
     /// Writes a <paramref name="value"/> of type <typeparamref name="T"/> into <paramref name="destination"/>.
     /// </summary>
@@ -61,7 +64,7 @@ public interface IHFormat
     /// <param name="value">The value to write.</param>    
     /// <param name="bytesWritten">The amount of bytes written into <paramref name="destination"/> span.</param>
     /// <returns>true if the value was written successfully; otherwise, false.</returns>
-    public bool TryWrite<T>(Span<byte> destination, T value, out int bytesWritten) where T : struct;
+    public bool TryWrite<T>(Span<byte> destination, T value, out int bytesWritten) where T : unmanaged;
 
     public bool TryReadUTF8(ReadOnlySpan<byte> source, out string value, out int bytesRead);
 

@@ -1,28 +1,22 @@
 ﻿namespace Sulakore.Network.Formats;
 
-// TODO: Optimize :)
-// TODO: maybe bring in static abstract interface versions of IHFormat
-// TODO: Prob split wedgie variants. We might need some "framing" abstraction
-public sealed class WedgieFormat : IHFormat
+public sealed class WedgieOutFormat : IHFormat
 {
-    public bool IsOutgoing { get; }
-    public int MinBufferSize => IsOutgoing ? 3 + MinPacketLength : MinPacketLength;
+    public int MinBufferSize => 3 + MinPacketLength;
     public int MinPacketLength => sizeof(ushort);
-    public bool HasLengthIndicator => IsOutgoing;
+    public bool HasLengthIndicator => true;
 
-    public WedgieFormat(bool isOutgoing) => IsOutgoing = isOutgoing;
-
-    public int GetSize<T>(T value) where T : struct => throw new NotImplementedException();
+    public int GetSize<T>(T value) where T : unmanaged => throw new NotImplementedException();
     public int GetSize(ReadOnlySpan<char> value) => throw new NotImplementedException();
     
-    public bool TryRead<T>(ReadOnlySpan<byte> source, out T value, out int bytesRead) where T : struct => throw new NotImplementedException();
+    public bool TryRead<T>(ReadOnlySpan<byte> source, out T value, out int bytesRead) where T : unmanaged => throw new NotImplementedException();
     public bool TryReadHeader(ReadOnlySpan<byte> source, out int length, out short id, out int bytesRead) => throw new NotImplementedException();
     public bool TryReadId(ReadOnlySpan<byte> source, out short id, out int bytesRead) => throw new NotImplementedException();
     public bool TryReadLength(ReadOnlySpan<byte> source, out int length, out int bytesRead) => throw new NotImplementedException();
     public bool TryReadUTF8(ReadOnlySpan<byte> source, out string value, out int bytesRead) => throw new NotImplementedException();
     public bool TryReadUTF8(ReadOnlySpan<byte> source, Span<char> destination, out int bytesRead, out int charsWritten) => throw new NotImplementedException();
     
-    public bool TryWrite<T>(Span<byte> destination, T value, out int bytesWritten) where T : struct => throw new NotImplementedException();
+    public bool TryWrite<T>(Span<byte> destination, T value, out int bytesWritten) where T : unmanaged => throw new NotImplementedException();
     public bool TryWriteHeader(Span<byte> destination, int length, short id, out int bytesWritten) => throw new NotImplementedException();
     public bool TryWriteId(Span<byte> source, short id, out int bytesWritten) => throw new NotImplementedException();
     public bool TryWriteLength(Span<byte> source, int length, out int bytesWritten) => throw new NotImplementedException();

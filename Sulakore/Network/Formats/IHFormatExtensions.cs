@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using Sulakore.Network.Formats.EvaWire;
 
 namespace Sulakore.Network.Formats;
 
@@ -8,7 +9,7 @@ namespace Sulakore.Network.Formats;
 /// Provides useful helper methods for <see cref="IHFormat"/> implementations.
 /// </summary>
 /// <remarks>
-/// Due to heavy optimizations, do not trust <c>out</c> parameters in <c>Try</c>-prefixed methods when the operation is unsuccessful (when the method returns <c>false</c>). 
+/// Due to optimizations, do not trust <c>out</c> parameters in <c>Try</c>-prefixed methods when the operation is unsuccessful (when the method returns <c>false</c>). 
 /// The <c>out</c> parameters contain un-initialized values when the operation is unsuccessful - this is standard behaviour and can be also seen in runtime libraries.
 /// </remarks>
 public static class IHFormatExtensions
@@ -18,7 +19,7 @@ public static class IHFormatExtensions
     /// </summary>
     /// <exception cref="IndexOutOfRangeException">Thrown if the <paramref name="source"/> does not have enough data to read a value of type <typeparamref name="T"/>.</exception>
     public static T Read<T>(this IHFormat format, ref ReadOnlySpan<byte> source)
-        where T : struct
+        where T : unmanaged
     {
         T value = format.Read<T>(source, out int bytesRead);
         source = source.Slice(bytesRead);
@@ -29,7 +30,7 @@ public static class IHFormatExtensions
     /// </summary>
     /// <exception cref="IndexOutOfRangeException">Thrown if the <paramref name="value"/> does not fit into the <paramref name="destination"/>.</exception>
     public static void Write<T>(this IHFormat format, ref Span<byte> destination, T value)
-        where T : struct
+        where T : unmanaged
     {
         format.Write(destination, value, out int bytesWritten);
         destination = destination.Slice(bytesWritten);
@@ -71,7 +72,7 @@ public static class IHFormatExtensions
     /// </summary>
     /// <exception cref="IndexOutOfRangeException">Thrown if the <paramref name="source"/> does not have enough data to read a value of type <typeparamref name="T"/>.</exception>
     public static long ReadUniqueId<T>(this IHFormat format, ref ReadOnlySpan<byte> source)
-        where T : struct
+        where T : unmanaged
     {
         long uniqueId = format.ReadUniqueId(source, out int bytesRead);
         source = source.Slice(bytesRead);
@@ -92,7 +93,7 @@ public static class IHFormatExtensions
     /// </summary>
     /// <exception cref="IndexOutOfRangeException">Thrown if the <paramref name="source"/> does not have enough data to read a value of type <typeparamref name="T"/>.</exception>
     public static T Read<T>(this IHFormat format, ReadOnlySpan<byte> source, out int bytesRead)
-        where T : struct
+        where T : unmanaged
     {
         if (!format.TryRead(source, out T value, out bytesRead))
             ThrowHelper.ThrowIndexOutOfRangeException();
@@ -103,7 +104,7 @@ public static class IHFormatExtensions
     /// </summary>
     /// <exception cref="IndexOutOfRangeException">Thrown if the <paramref name="value"/> does not fit into the <paramref name="destination"/>.</exception>
     public static void Write<T>(this IHFormat format, Span<byte> destination, T value, out int bytesWritten)
-        where T : struct
+        where T : unmanaged
     {
         if (!format.TryWrite(destination, value, out bytesWritten))
             ThrowHelper.ThrowIndexOutOfRangeException();
@@ -162,7 +163,6 @@ public static class IHFormatExtensions
     public static bool TryReadUniqueId<TFormat>(this TFormat format, ReadOnlySpan<byte> source, out long uniqueId, out int bytesRead)
         where TFormat : IHFormat
     {
-        // TODO: Check the if the type check is elided by JIT or do we have to do it all manually
         if (format is EvaWireFormat wireFormat && wireFormat.IsUnity)
         {
             return format.TryRead(source, out uniqueId, out bytesRead);
@@ -182,7 +182,6 @@ public static class IHFormatExtensions
     public static bool TryWriteUniqueId<TFormat>(this TFormat format, Span<byte> destination, long uniqueId, out int bytesWritten)
         where TFormat : IHFormat
     {
-        // TODO: Check the if the type check is elided by JIT or do we have to do it all manually
         if (format is EvaWireFormat wireFormat && wireFormat.IsUnity)
         {
             return format.TryWrite(destination, uniqueId, out bytesWritten);
@@ -233,7 +232,6 @@ public static class IHFormatExtensions
     public static bool TryReadArrayLength<TFormat>(this TFormat format, ReadOnlySpan<byte> source, out int arrayLength, out int bytesRead)
         where TFormat : IHFormat
     {
-        // TODO: Check the if the type check is elided by JIT or do we have to do it all manually
         if (format is EvaWireFormat wireFormat && wireFormat.IsUnity)
         {
             bool success = format.TryRead(source, out short length, out bytesRead);
@@ -253,7 +251,6 @@ public static class IHFormatExtensions
     public static bool TryWriteArrayLength<TFormat>(this TFormat format, Span<byte> destination, int arrayLength, out int bytesWritten)
         where TFormat : IHFormat
     {
-        // TODO: Check the if the "is" cast is elided by JIT or do we have to do it all manually
         if (format is EvaWireFormat wireFormat && wireFormat.IsUnity)
         {
             return format.TryWrite(destination, (short)arrayLength, out bytesWritten);

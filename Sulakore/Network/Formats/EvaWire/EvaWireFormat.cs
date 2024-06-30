@@ -2,20 +2,18 @@
 using System.Buffers;
 using System.Text.Unicode;
 using System.Buffers.Binary;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
-namespace Sulakore.Network.Formats;
+namespace Sulakore.Network.Formats.EvaWire;
 
-public sealed class EvaWireFormat : IHFormat
+public readonly struct EvaWireFormat(bool isUnity) : IHFormat
 {
+    public bool IsUnity { get; } = isUnity;
+
     public int MinBufferSize => sizeof(int) + MinPacketLength;
     public int MinPacketLength => sizeof(short);
     public bool HasLengthIndicator => true;
-
-    public bool IsUnity { get; }
-
-    public EvaWireFormat(bool isUnity) => IsUnity = isUnity;
 
     public bool TryReadLength(ReadOnlySpan<byte> source, out int length, out int bytesRead)
         => TryRead(source, out length, out bytesRead);
@@ -49,46 +47,33 @@ public sealed class EvaWireFormat : IHFormat
         return false;
     }
 
-    public int GetSize<T>(T value) where T : struct => Unsafe.SizeOf<T>();
+    public unsafe int GetSize<T>(T value) where T : unmanaged => sizeof(T);
     public int GetSize(ReadOnlySpan<char> value) => sizeof(short) + Encoding.UTF8.GetByteCount(value);
 
-    public bool TryRead<T>(ReadOnlySpan<byte> source, out T value, out int bytesRead) where T : struct
+    public unsafe bool TryRead<T>(ReadOnlySpan<byte> source, out T value, out int bytesRead)
+        where T : unmanaged
     {
         Unsafe.SkipInit(out value);
         Unsafe.SkipInit(out bytesRead);
-        if (Unsafe.SizeOf<T>() <= (uint)source.Length)
+        if (sizeof(T) <= (uint)source.Length)
         {
-            bytesRead = Unsafe.SizeOf<T>();
+            bytesRead = sizeof(T);
             ref byte sourcePtr = ref MemoryMarshal.GetReference(source);
             if (BitConverter.IsLittleEndian)
             {
-                if (typeof(T) == typeof(bool) ||
-                    typeof(T) == typeof(byte) ||
-                    typeof(T) == typeof(sbyte))
+                if (sizeof(T) == sizeof(byte))
                 {
                     value = Unsafe.As<byte, T>(ref sourcePtr);
                 }
-                else if (typeof(T) == typeof(int))
-                {
-                    value = (T)(object)BinaryPrimitives.ReverseEndianness(Unsafe.As<byte, int>(ref sourcePtr));
-                }
-                else if (typeof(T) == typeof(uint))
+                else if (sizeof(T) == sizeof(uint))
                 {
                     value = (T)(object)BinaryPrimitives.ReverseEndianness(Unsafe.As<byte, uint>(ref sourcePtr));
                 }
-                else if (typeof(T) == typeof(short))
-                {
-                    value = (T)(object)BinaryPrimitives.ReverseEndianness(Unsafe.As<byte, short>(ref sourcePtr));
-                }
-                else if (typeof(T) == typeof(ushort))
+                else if (sizeof(T) == sizeof(ushort))
                 {
                     value = (T)(object)BinaryPrimitives.ReverseEndianness(Unsafe.As<byte, ushort>(ref sourcePtr));
                 }
-                else if (typeof(T) == typeof(long))
-                {
-                    value = (T)(object)BinaryPrimitives.ReverseEndianness(Unsafe.As<byte, long>(ref sourcePtr));
-                }
-                else if (typeof(T) == typeof(ulong))
+                else if (sizeof(T) == sizeof(ulong))
                 {
                     value = (T)(object)BinaryPrimitives.ReverseEndianness(Unsafe.As<byte, ulong>(ref sourcePtr));
                 }
@@ -109,37 +94,26 @@ public sealed class EvaWireFormat : IHFormat
         return false;
     }
 
-    public bool TryWrite<T>(Span<byte> destination, T value, out int bytesWritten) where T : struct
+    public unsafe bool TryWrite<T>(Span<byte> destination, T value, out int bytesWritten)
+        where T : unmanaged
     {
         Unsafe.SkipInit(out bytesWritten);
 
         ref byte destPtr = ref MemoryMarshal.GetReference(destination);
-        if (Unsafe.SizeOf<T>() <= (uint)destination.Length)
+        if (sizeof(T) <= (uint)destination.Length)
         {
-            bytesWritten = Unsafe.SizeOf<T>();
+            bytesWritten = sizeof(T);
             if (BitConverter.IsLittleEndian)
             {
-                if (typeof(T) == typeof(int))
-                {
-                    value = (T)(object)BinaryPrimitives.ReverseEndianness((int)(object)value);
-                }
-                if (typeof(T) == typeof(uint))
+                if (sizeof(T) == sizeof(uint))
                 {
                     value = (T)(object)BinaryPrimitives.ReverseEndianness((uint)(object)value);
                 }
-                else if (typeof(T) == typeof(short))
-                {
-                    value = (T)(object)BinaryPrimitives.ReverseEndianness((short)(object)value);
-                }
-                else if (typeof(T) == typeof(ushort))
+                else if (sizeof(T) == sizeof(ushort))
                 {
                     value = (T)(object)BinaryPrimitives.ReverseEndianness((ushort)(object)value);
                 }
-                else if (typeof(T) == typeof(long))
-                {
-                    value = (T)(object)BinaryPrimitives.ReverseEndianness((long)(object)value);
-                }
-                else if (typeof(T) == typeof(ulong))
+                else if (sizeof(T) == sizeof(ulong))
                 {
                     value = (T)(object)BinaryPrimitives.ReverseEndianness((ulong)(object)value);
                 }
@@ -168,7 +142,10 @@ public sealed class EvaWireFormat : IHFormat
     {
         Unsafe.SkipInit(out value);
         if (!TryRead(source, out short length, out bytesRead) ||
-            source.Length < sizeof(short) + length) return false;
+            source.Length < sizeof(short) + length)
+        {
+            return false;
+        }
 
         bytesRead += length;
         value = Encoding.UTF8.GetString(source.Slice(sizeof(short), length));
@@ -181,8 +158,7 @@ public sealed class EvaWireFormat : IHFormat
         if (destination.Length < sizeof(short))
             return false;
 
-        OperationStatus status = Utf8.FromUtf16(value, destination.Slice(sizeof(short)), out _, out bytesWritten);
-        if (status != OperationStatus.Done)
+        if (Encoding.UTF8.TryGetBytes(value, destination.Slice(sizeof(short)), out bytesWritten))
             return false;
 
         if (!TryWrite(destination, (short)bytesWritten, out int written))
@@ -191,15 +167,39 @@ public sealed class EvaWireFormat : IHFormat
         bytesWritten += written;
         return true;
     }
+
+
     public bool TryReadUTF8(ReadOnlySpan<byte> source, Span<char> destination, out int bytesRead, out int charsWritten)
     {
         Unsafe.SkipInit(out charsWritten);
         if (!TryRead(source, out short length, out bytesRead) ||
             source.Length < sizeof(short) + length ||
-            destination.Length < length) return false;
+            destination.Length < length)
+        {
+            return false;
+        }
 
         OperationStatus status = Utf8.ToUtf16(source, destination.Slice(sizeof(short), length), out int actualLength, out charsWritten);
         bytesRead += actualLength;
         return status == OperationStatus.Done;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] // Make UTF8EncodingSealed.ReadUTF8 call visible to JIT
+    public bool TryWriteUTF8(Span<byte> destination, string value, out int bytesWritten)
+    {
+        Unsafe.SkipInit(out bytesWritten);
+        if (destination.Length < sizeof(short))
+            return false;
+
+        var utf8Handler = new Utf8.TryWriteInterpolatedStringHandler(
+            value.Length, 0, destination.Slice(2), out _);
+
+        utf8Handler.AppendLiteral(value);
+        Utf8.TryWrite(destination, ref utf8Handler, out bytesWritten);
+
+        TryWrite(destination, (ushort)bytesWritten, out _);
+        bytesWritten += sizeof(ushort);
+
+        return true;
     }
 }

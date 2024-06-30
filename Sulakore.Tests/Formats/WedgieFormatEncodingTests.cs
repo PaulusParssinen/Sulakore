@@ -16,7 +16,7 @@ public class WedgieFormatEncodingTests
     {
         var encodedBytes = Encoding.UTF8.GetBytes(encoded);
         
-        bool success = WedgieFormat.TryReadBase64UInt32(encodedBytes, out uint actualValue);
+        bool success = WedgieOutFormat.TryReadBase64UInt32(encodedBytes, out uint actualValue);
 
         Assert.True(success);
         Assert.Equal(expectedValue, actualValue);
@@ -32,7 +32,7 @@ public class WedgieFormatEncodingTests
     {
         Span<byte> buffer = stackalloc byte[expectedEncodedValue.Length];
         
-        bool success = WedgieFormat.TryWriteBase64UInt32(buffer, input);
+        bool success = WedgieOutFormat.TryWriteBase64UInt32(buffer, input);
 
         Assert.True(success);
         Assert.Equal(expectedEncodedValue, Encoding.UTF8.GetString(buffer));
