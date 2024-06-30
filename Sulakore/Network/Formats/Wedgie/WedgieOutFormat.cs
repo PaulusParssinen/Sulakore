@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace Sulakore.Network.Formats;
+namespace Sulakore.Network.Formats.Wedgie;
 
 public sealed class WedgieOutFormat : IHFormat
 {
@@ -46,7 +46,7 @@ public static bool TryReadVL64Int32(ReadOnlySpan<byte> source, out int value, ou
         for (int i = 1; i < count; i++)
         {
             // TODO: Proper length check instead of exception for Try overload
-            value |= (source[i] - 0x40) << (2 + (6 * (i - 1)));
+            value |= (source[i] & 0x3F) << (2 + (6 * (i - 1)));
         }
 
         if ((header & 0x4) == 0x4)
@@ -62,7 +62,7 @@ public static bool TryReadVL64Int32(ReadOnlySpan<byte> source, out int value, ou
         value = 0;
         for (int i = source.Length - 1; i >= 0; i--)
         {
-            value |= (source[source.Length - i  - 1] - 0x40u) << i * 6;
+            value |= (source[source.Length - i  - 1] & 0x3Fu) << i * 6;
         }
         return true;
     }
@@ -71,7 +71,7 @@ public static bool TryReadVL64Int32(ReadOnlySpan<byte> source, out int value, ou
     {
         for (int i = 0; i < destination.Length; i++)
         {
-            destination[i] = (byte)(0x40 + ((value >> ((destination.Length - 1 - i) * 6)) & 0x3F));
+            destination[i] = (byte)(0x40 | ((value >> ((destination.Length - 1 - i) * 6)) & 0x3F));
         }
         return true;
     }
@@ -83,13 +83,13 @@ public static bool TryReadVL64Int32(ReadOnlySpan<byte> source, out int value, ou
             return false;
 
         int left = Math.Abs(value);
-        int header = 0x40 + (left & 3);
+        int header = 0x40 | (left & 3);
 
         bytesWritten = 1;
         for (left >>= 2; left > 0; left >>= 6)
         {
             // TODO: Proper length check instead of exception for Try overload
-            destination[bytesWritten] = (byte)(0x40 + (left & 0x3F));
+            destination[bytesWritten] = (byte)(0x40 | (left & 0x3F));
             
             bytesWritten++;
         }
