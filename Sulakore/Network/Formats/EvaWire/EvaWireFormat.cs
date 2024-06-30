@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace Sulakore.Network.Formats.EvaWire;
 
-public readonly struct EvaWireFormat(bool isUnity) : IHFormat
+public sealed class EvaWireFormat(bool isUnity) : IHFormat
 {
     public bool IsUnity { get; } = isUnity;
 
